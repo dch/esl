@@ -6,6 +6,7 @@
 -export[ new/0,
          read/2,
          write/3,
+         delete/2,
          destroy/1
        ].
 
@@ -28,9 +29,16 @@ read(Key, [_ | Rest]) -> read(Key, Rest).
 write(Key, Element, []) -> [{Key, Element}];
 write(Key, Element, [{Key, _ } | Rest]) ->
     [{Key, Element} | Rest];
-write(Key, Element, [ Old | Rest]) ->
-    [Old | write(Key, Element, Rest)].
+write(Key, Element, [ Head | Rest]) ->
+    [Head | write(Key, Element, Rest)].
 
 %% db:delete(Key, Db) ⇒ NewDb.
+-spec delete(atom(), db()) -> db().
+delete(_, []) -> [];
+delete(Key, [{Key, _ } | Rest]) -> Rest;
+delete(Key, [ Head | Rest]) ->
+    [Head | delete(Key, Rest)].
+
+
 %% db:match(Element, Db) ⇒
 %% [Key1, ..., KeyN].
