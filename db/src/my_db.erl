@@ -5,15 +5,41 @@
 -spec test() -> term().
 -endif.
 
+-export([
+         start/0,
+         stop/0
+        ]).
+
+-spec start() -> ok | {error, already_started}.
+start() ->
+    case whereis(my_db) of
+        undefined ->
+            Pid = proc_lib:spawn(my_db, init, []),
+            register(my_db, Pid),
+            ok;
+        Pid when is_pid(Pid) -> {error, already_started}
+    end.
+
+-spec stop() -> ok.
+stop() ->
+    case whereis(my_db) of
+        undefined -> ok;
+        Pid when is_pid(Pid) -> my_db ! stop,
+                                ok
+    end.
+
 -ifdef(TEST).
+%% my_db:start() ⇒ ok.
+start_test() ->
+    my_db:stop(),
+    my_db:start(),
+    ?assertEqual(true, is_pid(whereis(my_db))).
+
 %% my_db:stop() ⇒ ok.
 stop_test() ->
     my_db:start(),
-    ?assertEqual(ok, my_db:stop()).
-
-%% my_db:start() ⇒ ok.
-start_test() ->
-    ?assertEqual(ok, my_db:start()).
+    ?assertEqual(ok, my_db:stop()),
+    ?assertEqual(false, is_pid(whereis(my_db))).
 
 %% my_db:write(Key, Element) ⇒ ok.
 write_test() ->
