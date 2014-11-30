@@ -14,24 +14,6 @@
 -spec init() -> any().
 init() -> loop(db:new()).
 
--spec loop(any()) -> ok.
-loop(Db) -> receive
-                stop -> ok;
-                {From, write, K, V} ->
-                    From ! ok,
-                    loop(db:write(K, V, Db));
-                {From, read, K} ->
-                    From ! db:read(K, Db),
-                    loop(Db);
-                {From, match, V} ->
-                    From ! db:match(V, Db),
-                    loop(Db);
-                {From, delete, K} ->
-                    From ! ok,
-                    loop(db:delete(K, Db)),
-                    loop(Db)
-            end.
-
 -spec start() -> ok | {error, already_started}.
 start() ->
     case whereis(my_db) of
@@ -49,6 +31,30 @@ stop() ->
         Pid when is_pid(Pid) -> my_db ! stop,
                                 ok
     end.
+
+%% Internal
+
+-spec return(reference()) -> any().
+return(Ref) ->
+    receive {Ref, Response} -> Response end.
+
+-spec loop(any()) -> ok.
+loop(Db) -> receive
+                stop -> ok;
+                {write, K, V} ->
+                    loop(db:write(K, V, Db));
+                {From, Ref, read, K} ->
+                    From ! {Ref, db:read(K, Db)},
+                    loop(Db);
+                {From, Ref, match, V} ->
+                    From ! {Ref, db:match(V, Db)},
+                    loop(Db);
+                {delete, K} ->
+                    loop(db:delete(K, Db)),
+                    loop(Db)
+            end.
+
+%% Tests
 
 -ifdef(TEST).
 %% my_db:start() ⇒ ok.
