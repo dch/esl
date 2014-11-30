@@ -7,6 +7,7 @@
          read/2,
          write/3,
          delete/2,
+         match/2,
          destroy/1
        ].
 
@@ -39,6 +40,8 @@ delete(Key, [{Key, _ } | Rest]) -> Rest;
 delete(Key, [ Head | Rest]) ->
     [Head | delete(Key, Rest)].
 
-
-%% db:match(Element, Db) ⇒
-%% [Key1, ..., KeyN].
+%% db:match(Element, Db) ⇒ [Key1, ..., KeyN].
+-spec match(atom(), db()) -> list(atom()).
+match(_, []) -> [];
+match(Element, [{Key, Element } | Rest]) -> [ Key | match(Element, Rest)];
+match(Element, [ _ | Rest]) -> match(Element, Rest).
