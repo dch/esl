@@ -1,0 +1,2 @@
+-record(data, {key, data}).
+

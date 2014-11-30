@@ -1,11 +1,11 @@
 -module(db).
+-include("db.hrl").
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 -spec test() -> term().
 -endif.
 
--record(data, {key, data}).
 %-opaque key() :: {atom(), atom()}.
 %-opaque db() :: list( key()).
 %-export_type([key/0, db/0]).
