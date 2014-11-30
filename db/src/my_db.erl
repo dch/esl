@@ -16,7 +16,20 @@ init() -> loop(db:new()).
 
 -spec loop(any()) -> ok.
 loop(Db) -> receive
-                stop -> ok
+                stop -> ok;
+                {From, write, K, V} ->
+                    From ! ok,
+                    loop(db:write(K, V, Db));
+                {From, read, K} ->
+                    From ! db:read(K, Db),
+                    loop(Db);
+                {From, match, V} ->
+                    From ! db:match(V, Db),
+                    loop(Db);
+                {From, delete, K} ->
+                    From ! ok,
+                    loop(db:delete(K, Db)),
+                    loop(Db)
             end.
 
 -spec start() -> ok | {error, already_started}.
