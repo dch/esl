@@ -8,8 +8,30 @@
 -export([
          start/0,
          init/0,
-         stop/0
+         stop/0,
+         read/1,
+         write/2,
+         delete/1,
+         match/1
         ]).
+
+%% API
+
+-spec read(atom()) -> {error, instance} | {ok, atom()}.
+read(K) -> my_db ! {self(), Ref = make_ref(), read, K},
+           return(Ref).
+
+-spec write(atom(), atom()) -> ok.
+write(K, V) -> my_db ! {write, K, V},
+               ok.
+
+-spec delete(atom()) -> ok.
+delete(K) -> my_db ! {delete, K},
+                ok.
+
+-spec match(atom()) -> list(atom()).
+match(V) -> my_db ! {self(), Ref = make_ref(), match, V},
+           return(Ref).
 
 -spec init() -> any().
 init() -> loop(db:new()).
