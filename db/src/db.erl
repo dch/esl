@@ -8,6 +8,7 @@
 -opaque key() :: {atom(), atom()}.
 -opaque db() :: list( key()).
 -export_type([key/0, db/0]).
+-record(data, {key, data}).
 -export[ new/0,
          read/2,
          write/3,
@@ -31,10 +32,10 @@ read(Key, [{Key, Element} | _Rest]) -> {ok, Element}; % matched, return element
 read(Key, [_ | Rest]) -> read(Key, Rest).
 
 %% db:write(Key, Element, Db) ⇒ NewDb.
--spec write(atom(), atom(), db()) -> db().
-write(Key, Element, []) -> [{Key, Element}];
-write(Key, Element, [{Key, _ } | Rest]) ->
-    [{Key, Element} | Rest];
+%-spec write(atom(), atom(), db()) -> db().
+write(Key, Element, []) -> [ #data{key=Key, data=Element} ];
+write(Key, Element, [ #data{key=Key} | Rest]) ->
+    [#data{key=Key, data=Element} | Rest];
 write(Key, Element, [ Head | Rest]) ->
     [Head | write(Key, Element, Rest)].
 
