@@ -28,7 +28,7 @@ destroy(_) -> ok.
 %% db:read(Key, Db) ⇒ {ok, Element} | {error, instance}.
 %-spec read(atom(), db()) -> {ok, atom()} | {error, instance}.
 read(_Key, []) -> {error,instance}; % end of list and no key found
-read(Key, [{Key, Element} | _Rest]) -> {ok, Element}; % matched, return element
+read(Key, [#data{key=Key, data=Element}| _Rest]) -> {ok, Element}; % matched, return element
 read(Key, [_ | Rest]) -> read(Key, Rest).
 
 %% db:write(Key, Element, Db) ⇒ NewDb.
@@ -42,14 +42,14 @@ write(Key, Element, [ Head | Rest]) ->
 %% db:delete(Key, Db) ⇒ NewDb.
 %-spec delete(atom(), db()) -> db().
 delete(_, []) -> [];
-delete(Key, [{Key, _ } | Rest]) -> Rest;
+delete(Key, [ #data{key=Key} | Rest]) -> Rest;
 delete(Key, [ Head | Rest]) ->
     [Head | delete(Key, Rest)].
 
 %% db:match(Element, Db) ⇒ [Key1, ..., KeyN].
 %-spec match(atom(), db()) -> list(atom()).
 match(_, []) -> [];
-match(Element, [{Key, Element } | Rest]) -> [ Key | match(Element, Rest)];
+match(Element, [#data{key=Key, data=Element} | Rest]) -> [ Key | match(Element, Rest)];
 match(Element, [ _ | Rest]) -> match(Element, Rest).
 
 -ifdef(TEST).
