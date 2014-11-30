@@ -7,8 +7,17 @@
 
 -export([
          start/0,
+         init/0,
          stop/0
         ]).
+
+-spec init() -> any().
+init() -> loop(db:new()).
+
+-spec loop(any()) -> ok.
+loop(Db) -> receive
+                stop -> ok
+            end.
 
 -spec start() -> ok | {error, already_started}.
 start() ->
