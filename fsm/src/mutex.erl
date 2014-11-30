@@ -37,7 +37,7 @@ loop(free) ->
             From ! {mutex, Ref, free},
             loop(free);
         {From, Ref, acquire} ->
-            link(From),
+            catch link(From),
             From ! {mutex, Ref, acquired},
             loop({busy, From})
     end;
